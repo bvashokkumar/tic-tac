@@ -361,7 +361,7 @@ const BoardRoom = (props) => {
         }
     }
 
-    const resetGame =()=>{
+    const resetGame = () => {
         setGameStart(false);
         setNValue(3);
         setKValue(3);
@@ -369,7 +369,7 @@ const BoardRoom = (props) => {
         setZeroTurn(true);
     }
 
-    const handleReset =()=>{
+    const handleReset = () => {
         resetGame();
         let obj = {
             type: "RESET"
@@ -411,17 +411,17 @@ const BoardRoom = (props) => {
             </div>}
             {gameStart &&
                 <div>
-                    <div style={{float:'right',margin:'10px'}}><Button onClick={() => handleReset()} variant="contained" color="secondary">RESET</Button></div>
+                    <div style={{ float: 'right', margin: '10px' }}><Button onClick={() => handleReset()} variant="contained" color="secondary">RESET</Button></div>
                     <div style={{ textAlign: 'center', margin: '10px 0px', color: 'green' }}>GAME STARTED</div>
 
                 </div>
             }
             <div className="body_center" style={{ pointerEvents: connectionEstablished ? "" : "none" }}>
-                {connectionEstablished ? 
-                <div style={{ margin: '25px' }}>
-                    {zeroTurn ? '0 turn now' : 'X turn now'}{peerRef.current.initiator && zeroTurn ?'(your turn now)':'(his turn)'}
-                </div> : 
-                <div style={{ margin: '25px', color: 'red' }}>Waiting for user to join...</div>}
+                {connectionEstablished ?
+                    <div style={{ margin: '25px' }}>
+                        {gameStart ? <div>{zeroTurn ? '0 turn now' : 'X turn now'}{peerRef.current.initiator && zeroTurn ? '(your turn now)' : '(his turn)'}</div> : <div>Accept To Start Game</div>}
+                    </div> :
+                    <div style={{ margin: '25px', color: 'red' }}>Waiting for user to join...</div>}
                 {board.map((row, rowIndex) => {
                     return <div style={{ display: 'flex' }}>
                         {row.map((item, colIndex) => {
@@ -430,7 +430,7 @@ const BoardRoom = (props) => {
                     </div>
                 })}
             </div>
-           
+
         </>
     );
 };
