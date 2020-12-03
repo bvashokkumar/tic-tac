@@ -398,6 +398,7 @@ const BoardRoom = (props) => {
         setKValue(3);
         setBoard(initialValue);
         setZeroTurn(true);
+        setIntialNKRequest(false);
     }
 
     const handleReset = () => {
