@@ -273,6 +273,7 @@ const BoardRoom = (props) => {
             if (type == "INITIAL") {
                 const { newNValue, newKValue } = recData.dataObj;
                 setInitialNK({ newKValue: newKValue, newNValue: newNValue })
+                setIntialNKRequest(true);
                 setRecBoard(newNValue, newKValue);
             }
             if (type == "INITIAL_ACCEPT") {
@@ -340,7 +341,7 @@ const BoardRoom = (props) => {
     }
 
     const [initialNK, setInitialNK] = useState({});
-
+    const[initialNKRequest,setIntialNKRequest] = useState(false);
 
 
     function sendFile(obj) {
@@ -412,13 +413,12 @@ const BoardRoom = (props) => {
     return (
         <>
             <div style={{textAlign:'center',fontWeight:'bold',margin:'10px 0px'}}>Room ID: {roomID}</div>
-            {peerRef.current && peerRef.current.initiator && !gameStart &&
+            {!gameStart && !initialNKRequest && connectionEstablished &&
                 <div style={{ display: 'flex' }}>
                     <div style={{ margin: '25px' }}>Enter the value of n</div>
                     <Select
                         value={nValue}
                         onChange={(e) => handleNChange(e.target.value)}
-                        disabled={!peerRef.current.initiator}
                     >
                         {nArraySize.map(item => {
                             return <MenuItem value={item}>{item}</MenuItem>
@@ -428,7 +428,6 @@ const BoardRoom = (props) => {
                     <Select
                         value={kValue}
                         onChange={(e) => handleKChange(e.target.value)}
-                        disabled={!peerRef.current.initiator}
                     >
                         {kArraySize.map(item => {
                             return <MenuItem value={item}>{item}</MenuItem>
@@ -437,7 +436,7 @@ const BoardRoom = (props) => {
                     <div style={{ margin: '25px' }}><Button onClick={() => handleNKSend()} variant="contained" >Send N,K</Button></div>
                 </div>
             }
-            {peerRef.current && !peerRef.current.initiator && !gameStart && <div style={{ display: 'flex' }}>
+            {!gameStart && initialNKRequest && connectionEstablished && <div style={{ display: 'flex' }}>
                 <div style={{ margin: '25px' }}>N = {initialNK.newNValue}, K = {initialNK.newKValue}</div>
                 <div style={{ margin: '25px' }}><Button onClick={() => handleNKRec("YES")} variant="contained" >Accept</Button></div>
                 <div style={{ margin: '25px' }}><Button onClick={() => handleNKRec("NO")} variant="contained" >Reject</Button></div>
@@ -452,7 +451,7 @@ const BoardRoom = (props) => {
             <div className="body_center" style={{ pointerEvents: connectionEstablished ? "" : "none" }}>
                 {connectionEstablished ?
                     <div style={{ margin: '25px' }}>
-                        {gameStart ? <div>{zeroTurn ? '0 turn now' : 'X turn now'}{(peerRef.current.initiator && zeroTurn) || (!peerRef.current.initiator && !zeroTurn) ? '(your turn now)' : '(his turn)'}</div> : <div>{peerRef.current.initiator ? 'Waiting for acceptance':'Accept To Start Game'}</div>}
+                        {gameStart ? <div>{zeroTurn ? '0 turn now' : 'X turn now'}{(peerRef.current.initiator && zeroTurn) || (!peerRef.current.initiator && !zeroTurn) ? '(your turn now)' : '(his turn)'}</div> : <div>{!initialNKRequest ? 'Waiting for acceptance':'Accept To Start Game'}</div>}
                     </div> :
                     <div style={{ margin: '25px', color: 'red' }}>Waiting for user to join...</div>}
                 {board.map((row, rowIndex) => {
