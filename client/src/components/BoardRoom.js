@@ -2,21 +2,10 @@ import React, { useEffect, useRef, useState, useContext } from "react";
 import io from "socket.io-client";
 import Peer from "simple-peer";
 import styled from "styled-components";
-import streamSaver from "streamsaver";
-import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import { BoardUpdateContext } from "../context/boardState";
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-
-const Container = styled.div`
-    padding: 20px;
-    display: flex;
-    height: 100vh;
-    width: 90%;
-    margin: auto;
-    flex-wrap: wrap;
-`;
 
 const worker = new Worker("../worker.js");
 
@@ -24,7 +13,7 @@ const BoardRoom = (props) => {
     const [connectionEstablished, setConnection] = useState(false);
     const [file, setFile] = useState("");
     const [gotFile, setGotFile] = useState(false);
-    const [gameStart,setGameStart]=useState(false);
+    const [gameStart, setGameStart] = useState(false);
 
     const chunksRef = useRef([]);
     const socketRef = useRef();
@@ -181,24 +170,23 @@ const BoardRoom = (props) => {
     }
 
 
-    const handleNChange = (arg) => {
+    function handleNChange(arg) {
         let value = arg;
         setNValue(value);
         setKValue(value);
         setKArraySize(Array(value - 1).fill().map((x, i) => i + 2))
-        let newBoard = Array(value).fill("").map(row => new Array(value).fill(""))
-        setBoard(newBoard);
-
     };
 
-    const setRecBoard=(newNValue, newKValue)=> {
+    function setRecBoard(newNValue, newKValue) {
         handleNChange(newNValue);
         handleKChange(newKValue);
-        
+
     }
 
-    const onBoxClick = (rowIndex, colIndex) => {
+    function onBoxClick(rowIndex, colIndex) {
+        console.log("box clicked ", rowIndex, colIndex);
         let currentBoard = [...board];
+        console.log("current board", currentBoard);
         if (currentBoard[rowIndex][colIndex] == '') {
             setZeroTurn(!zeroTurn);
             if (zeroTurn) {
@@ -218,6 +206,15 @@ const BoardRoom = (props) => {
     const handleKChange = (value) => {
         setKValue(value);
     };
+
+    useEffect(() => {
+        console.log("printing board", board);
+    }, [board]);
+
+    useEffect(() => {
+        let newBoard = Array(nValue).fill("").map(row => new Array(nValue).fill(""))
+        setBoard(newBoard);
+    }, [nValue]);
 
     useEffect(() => {
         socketRef.current = io.connect("/");
@@ -243,7 +240,44 @@ const BoardRoom = (props) => {
 
     }, []);
 
+    const [netwrokData, setNetwrokData] = useState("");
+    const handleReceivingData = (data) => {
+        setNetwrokData(data);
+    }
 
+    useEffect(() => {
+        if (netwrokData.toString().includes("done")) {
+            setGotFile(true);
+            let recData = JSON.parse(netwrokData);
+            const { type, id } = recData.dataObj;
+            console.log("rec data", recData);
+            if (type == "INITIAL") {
+                const { newNValue, newKValue } = recData.dataObj;
+                setInitialNK({ newKValue: newKValue, newNValue: newNValue })
+                setRecBoard(newNValue, newKValue);
+            }
+            if (type == "INITIAL_ACCEPT") {
+                const { newNValue, newKValue } = recData.dataObj;
+                alert("accepted");
+                setGameStart(true);
+            }
+            if (type == "INITIAL_REJECT") {
+                alert("rejected");
+            }
+            if (type == "UPDATE") {
+                const { rowIndex, colIndex } = recData.dataObj;
+                console.log("type udate call rec boxClick", rowIndex, colIndex);
+                onBoxClick(rowIndex, colIndex);
+            }
+            if (type == "RESET") {
+                resetGame();
+                alert("game reset")
+            }
+        } else {
+            worker.postMessage(netwrokData);
+        }
+
+    }, [netwrokData]);
 
     function createPeer(userToSignal, callerID) {
         const peer = new Peer({
@@ -277,33 +311,7 @@ const BoardRoom = (props) => {
 
     const [initialNK, setInitialNK] = useState({});
 
-    function handleReceivingData(data) {
-        if (data.toString().includes("done")) {
-            setGotFile(true);
-            let recData = JSON.parse(data);
-            const { type, id } = recData.dataObj;
-            console.log("rec data", recData);
-            if (type == "INITIAL") {
-                const { newNValue, newKValue } = recData.dataObj;
-                setInitialNK({ newKValue: newKValue, newNValue: newNValue })
-                setRecBoard(newNValue,newKValue);
-            }
-            if (type == "INITIAL_ACCEPT") {
-                const { newNValue, newKValue } = recData.dataObj;
-                alert("accepted");
-                setGameStart(true);
-            }
-            if (type == "INITIAL_REJECT") {
-                alert("rejected");
-            }
-            if (type == "UPDATE") {
-                const { rowIndex, colIndex } = recData.dataObj;
-                onBoxClick(rowIndex, colIndex);
-            }
-        } else {
-            worker.postMessage(data);
-        }
-    }
+
 
     function sendFile(obj) {
         const peer = peerRef.current;
@@ -320,8 +328,7 @@ const BoardRoom = (props) => {
     }
 
     function handleNKRec(arg) {
-        if(arg=="YES")
-        {
+        if (arg == "YES") {
             let obj = {
                 newNValue: nValue,
                 newKValue: kValue,
@@ -329,7 +336,7 @@ const BoardRoom = (props) => {
             };
             setGameStart(true);
             sendFile(obj)
-        }else{
+        } else {
             let obj = {
                 newNValue: nValue,
                 newKValue: kValue,
@@ -339,14 +346,33 @@ const BoardRoom = (props) => {
         }
     }
 
-    const [updateValue,setUpdateValue]=useState(false);
 
-    function handleBoxClick(rowIndex,colIndex){
-        onBoxClick(rowIndex, colIndex);
+    function handleBoxClick(rowIndex, colIndex) {
+        console.log("zero turn", zeroTurn);
+        console.log("peerRef.current.initiator", peerRef.current.initiator);
+        if ((zeroTurn && peerRef.current.initiator) || (!zeroTurn && !peerRef.current.initiator)) {
+            onBoxClick(rowIndex, colIndex);
+            let obj = {
+                rowIndex: rowIndex,
+                colIndex: colIndex,
+                type: "UPDATE"
+            };
+            sendFile(obj);
+        }
+    }
+
+    const resetGame =()=>{
+        setGameStart(false);
+        setNValue(3);
+        setKValue(3);
+        setBoard(initialValue);
+        setZeroTurn(true);
+    }
+
+    const handleReset =()=>{
+        resetGame();
         let obj = {
-            rowIndex: rowIndex,
-            colIndex: colIndex,
-            type: "UPDATE"
+            type: "RESET"
         };
         sendFile(obj);
     }
@@ -383,17 +409,28 @@ const BoardRoom = (props) => {
                 <div style={{ margin: '25px' }}><Button onClick={() => handleNKRec("YES")} variant="contained" >Accept</Button></div>
                 <div style={{ margin: '25px' }}><Button onClick={() => handleNKRec("NO")} variant="contained" >Reject</Button></div>
             </div>}
-            <div style={{textAlign:'center',margin:'10px 0px',color:'green'}}>{gameStart?"GAME STARTED":null}</div>
+            {gameStart &&
+                <div>
+                    <div style={{float:'right',margin:'10px'}}><Button onClick={() => handleReset()} variant="contained" color="secondary">RESET</Button></div>
+                    <div style={{ textAlign: 'center', margin: '10px 0px', color: 'green' }}>GAME STARTED</div>
+
+                </div>
+            }
             <div className="body_center" style={{ pointerEvents: connectionEstablished ? "" : "none" }}>
-                {connectionEstablished ? <div style={{ margin: '25px' }}>{zeroTurn ? '0 turn now' : 'X turn now'}</div> : <div style={{ margin: '25px', color: 'red' }}>Waiting for user to join...</div>}
+                {connectionEstablished ? 
+                <div style={{ margin: '25px' }}>
+                    {zeroTurn ? '0 turn now' : 'X turn now'}{peerRef.current.initiator?'(your turn now)':'(his turn)'}
+                </div> : 
+                <div style={{ margin: '25px', color: 'red' }}>Waiting for user to join...</div>}
                 {board.map((row, rowIndex) => {
                     return <div style={{ display: 'flex' }}>
                         {row.map((item, colIndex) => {
-                            return <div style={{ height: '50px', width: '50px', border: 'solid 1px grey', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }} onClick={() => { handleBoxClick(rowIndex, colIndex); console.log(rowIndex, colIndex) }}>{item}</div>
+                            return <div style={{ height: '50px', width: '50px', border: 'solid 1px grey', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }} onClick={() => { handleBoxClick(rowIndex, colIndex) }}>{item}</div>
                         })}
                     </div>
                 })}
             </div>
+           
         </>
     );
 };
