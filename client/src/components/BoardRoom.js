@@ -208,6 +208,8 @@ const BoardRoom = (props) => {
         for(let i=0;i<nValue;i++){
             for(let j=0;j<kValue;j++){
                 if(currentBoard[i][j]==""){
+                    i=nValue;
+                    j=kValue;
                     flag=true;
                     break;
                 }
@@ -409,7 +411,7 @@ const BoardRoom = (props) => {
 
     return (
         <>
-            <div>Room ID: {roomID}</div>
+            <div style={{textAlign:'center',fontWeight:'bold',margin:'10px 0px'}}>Room ID: {roomID}</div>
             {peerRef.current && peerRef.current.initiator && !gameStart &&
                 <div style={{ display: 'flex' }}>
                     <div style={{ margin: '25px' }}>Enter the value of n</div>
@@ -442,7 +444,7 @@ const BoardRoom = (props) => {
             </div>}
             {gameStart &&
                 <div>
-                    <div style={{ float: 'right', margin: '10px' }}><Button onClick={() => handleReset()} variant="contained" color="secondary">RESET</Button></div>
+                    <div style={{ float: 'right', margin: '10px' }}><Button onClick={() => handleReset()} variant="contained">RESET</Button></div>
                     <div style={{ textAlign: 'center', margin: '10px 0px', color: 'green' }}>GAME STARTED</div>
 
                 </div>
