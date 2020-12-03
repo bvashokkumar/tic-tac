@@ -445,7 +445,7 @@ const BoardRoom = (props) => {
             {gameStart &&
                 <div>
                     <div style={{ float: 'right', margin: '10px' }}><Button onClick={() => handleReset()} variant="contained">RESET</Button></div>
-                    <div style={{ textAlign: 'center', margin: '10px 0px', color: 'green' }}>GAME STARTED</div>
+            <div style={{ textAlign: 'center', margin: '10px 0px', color: 'green' }}>GAME STARTED (N={nValue}, K={kValue})</div>
 
                 </div>
             }
