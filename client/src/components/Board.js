@@ -185,6 +185,23 @@ function Board() {
             verticalCheck(currentBoard, rowIndex, colIndex);
             leftDiagonalCheck(currentBoard, rowIndex, colIndex);
             rightDiagonalCheck(currentBoard, rowIndex, colIndex);
+            checkGameOver(currentBoard);
+        }
+    }
+
+    const checkGameOver =(currentBoard)=>{
+        let flag=false;
+        for(let i=0;i<nValue;i++){
+            for(let j=0;j<kValue;j++){
+                if(currentBoard[i][j]==""){
+                    flag=true;
+                    break;
+                }
+            }
+        }
+        if(!flag){
+            onGameOver();
+            alert("game over");
         }
     }
 
