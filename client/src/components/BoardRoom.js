@@ -419,17 +419,17 @@ const BoardRoom = (props) => {
             <div className="body_center" style={{ pointerEvents: connectionEstablished ? "" : "none" }}>
                 {connectionEstablished ?
                     <div style={{ margin: '25px' }}>
-                        {gameStart ? <div>{zeroTurn ? '0 turn now' : 'X turn now'}{(peerRef.current.initiator && zeroTurn)||(!peerRef.current.initiator && !zeroTurn) ? '(your turn now)' : '(his turn)'}</div> : <div>Accept To Start Game</div>}
+                        {gameStart ? <div>{zeroTurn ? '0 turn now' : 'X turn now'}{(peerRef.current.initiator && zeroTurn) || (!peerRef.current.initiator && !zeroTurn) ? '(your turn now)' : '(his turn)'}</div> : <div>{peerRef.current.initiator ? 'Waiting for acceptance':'Accept To Start Game'}</div>}
                     </div> :
                     <div style={{ margin: '25px', color: 'red' }}>Waiting for user to join...</div>}
                 {board.map((row, rowIndex) => {
-                    return <div style={{ display: 'flex' }}>
-                        {row.map((item, colIndex) => {
-                            return <div style={{ height: '50px', width: '50px', border: 'solid 1px grey', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }} onClick={() => { handleBoxClick(rowIndex, colIndex) }}>{item}</div>
+                            return <div style={{ display: 'flex' }}>
+                                {row.map((item, colIndex) => {
+                                    return <div style={{ height: '50px', width: '50px', border: 'solid 1px grey', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }} onClick={() => { handleBoxClick(rowIndex, colIndex) }}>{item}</div>
+                                })}
+                            </div>
                         })}
                     </div>
-                })}
-            </div>
 
         </>
     );
