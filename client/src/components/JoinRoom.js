@@ -17,11 +17,11 @@ function JoinRoom() {
         <>
             <div className="body_center">
                 <div style={{ fontSize: "2rem", color: "#514F4F", marginBottom: '10px' }}>
-                    Enter the UID to join
+                    Enter the room ID to join
                 </div>
                 <TextField
                     style={{ width: '400px' }}
-                    label="UID"
+                    label="ID"
                     variant="filled"
                     margin="normal"
                     size="small"

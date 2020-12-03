@@ -279,6 +279,17 @@ const BoardRoom = (props) => {
 
     }, [netwrokData]);
 
+    const[userType,setUserType]=useState("")
+
+    useEffect(() => {
+        console.log("peerRef",peerRef);
+        if(peerRef.current && peerRef.current.initiator){
+            setUserType("HOST")
+        }else if(peerRef.current && !peerRef.current.initiator){
+            setUserType("CLIENT")
+        }
+    }, [peerRef]);
+
     function createPeer(userToSignal, callerID) {
         const peer = new Peer({
             initiator: true,
@@ -377,8 +388,11 @@ const BoardRoom = (props) => {
         sendFile(obj);
     }
 
+    
+
     return (
         <>
+            <div>Room ID: {roomID}</div>
             {peerRef.current && peerRef.current.initiator && !gameStart &&
                 <div style={{ display: 'flex' }}>
                     <div style={{ margin: '25px' }}>Enter the value of n</div>
