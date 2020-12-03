@@ -419,7 +419,7 @@ const BoardRoom = (props) => {
             <div className="body_center" style={{ pointerEvents: connectionEstablished ? "" : "none" }}>
                 {connectionEstablished ? 
                 <div style={{ margin: '25px' }}>
-                    {zeroTurn ? '0 turn now' : 'X turn now'}{peerRef.current.initiator?'(your turn now)':'(his turn)'}
+                    {zeroTurn ? '0 turn now' : 'X turn now'}{peerRef.current.initiator && zeroTurn ?'(your turn now)':'(his turn)'}
                 </div> : 
                 <div style={{ margin: '25px', color: 'red' }}>Waiting for user to join...</div>}
                 {board.map((row, rowIndex) => {
